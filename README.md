@@ -206,7 +206,7 @@ async function main() {
       `
       open bing.com
       click input
-      input mcp-use-ts
+      input easy-mcp-use
       click search
       ` 
     );
