@@ -157,6 +157,12 @@ For other settings, models, and more, check out the documentation.
 
 # Example Use Cases
 
+## http server example
+
+there have a example project:
+[easy-mcp-use-example](https://github.com/dforel/easy-mcp-use-example)
+(https://github.com/dforel/easy-mcp-use-example)
+
 ## Web Browsing with Playwright
 
 ```typescript
@@ -323,6 +329,8 @@ If you use MCP-Use-TS in your research or project, please cite:
 this project is a fork of [mcp-use](https://github.com/mcp-use/mcp-use)
 
 i hope you enjoy it
+
+
 
 # License
 
