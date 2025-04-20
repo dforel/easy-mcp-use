@@ -1,0 +1,11 @@
+/src/
+/examples/
+/dist/examples/
+/dist/tests/
+node_modules/
+package-lock.json
+.env
+log.txt
+jest.config.js
+./dist/tests/
+/tests/
