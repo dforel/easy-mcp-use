@@ -1,5 +1,5 @@
 <div align="center">
-[English](./README.md) | 简体中文
+[English](/README.md) | 简体中文
 </div>
 
 <h1 align="center">统一的 TypeScript MCP 客户端库</h1>
