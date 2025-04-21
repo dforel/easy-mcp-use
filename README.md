@@ -6,6 +6,7 @@
 [![npm Version](https://img.shields.io/npm/v/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
 [![TypeScript Support](https://img.shields.io/npm/types/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
 [![Documentation](https://img.shields.io/badge/docs-easy--mcp--use.52kx.net-blue)](https://easy-mcp-use.52kx.net)
+
 [![License](https://img.shields.io/github/license/dforel/easy-mcp-use)](https://github.com/dforel/easy-mcp-use/blob/main/LICENSE)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
 [![GitHub stars](https://img.shields.io/github/stars/dforel/easy-mcp-use?style=social)](https://github.com/dforel/easy-mcp-use/stargazers)
