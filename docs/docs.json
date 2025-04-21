@@ -21,7 +21,7 @@
             ]
           },
           {
-            "group": "Essentials",
+            "group": "essentials",
             "pages": [
               "essentials/configuration",
               "essentials/llm-integration",

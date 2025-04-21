@@ -1,0 +1,198 @@
+---
+title: Configuration
+description: "Configure your easy-mcp-use environment"
+---
+
+# Configuration Guide
+
+This guide covers all the configuration options available in easy-mcp-use.
+
+## API Keys
+
+Make sure to have the API key relative to the provider of your choice available in the environment. You can either:
+
+1 - Create `.env` file with your keys as:
+
+```bash
+# OpenAI
+OPENAI_API_KEY=your_api_key_here
+# Anthropic
+ANTHROPIC_API_KEY=your_api_key_here
+# Groq
+GROQ_API_KEY=your_api_key_here
+```
+
+and load it in your TypeScript code using:
+
+```typescript
+import dotenv from 'dotenv';
+dotenv.config();
+```
+
+This will make all the keys defined in `.env` available in your runtime, granted that you run from where the .env is located.
+
+2 - Set it in your environment by running in your terminal the following command, e.g. for OpenAI:
+
+```bash
+export OPENAI_API_KEY='...'
+```
+
+and then import it in your TypeScript code as:
+
+```typescript
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+```
+
+or any other method you might prefer.
+
+## MCP Server Configuration
+
+easy-mcp-use supports any MCP server through a flexible configuration system. (For a list of awesome servers you can visit https://github.com/punkpeye/awesome-mcp-servers or https://github.com/appcypher/awesome-mcp-servers which have an amazing collection of them)
+
+The configuration is defined in a JSON file with the following structure:
+
+```json
+{
+  "mcpServers": {
+    "server_name": {
+      "command": "command_to_run",
+      "args": ["arg1", "arg2"],
+      "env": {
+        "ENV_VAR": "value"
+      }
+    }
+  }
+}
+```
+
+MCP servers can use different connection types (STDIO, HTTP). For details on these connection types and how to configure them, see the [Connection Types](./connection-types) guide.
+
+### Configuration Options
+
+- `server_name`: A unique identifier for your MCP server
+- `command`: The command to start the MCP server
+- `args`: Array of arguments to pass to the command
+- `env`: Environment variables to set for the server
+
+### Example Configuration
+
+Here's a basic example of how to configure an MCP server:
+
+```json
+{
+  "mcpServers": {
+    "my_server": {
+      "command": "npx",
+      "args": ["@my-mcp/server"],
+      "env": {
+        "PORT": "3000"
+      }
+    }
+  }
+}
+```
+
+### Multiple Server Configuration
+
+You can configure multiple MCP servers in a single configuration file, allowing you to use different servers for different tasks or combine their capabilities (e.g.):
+
+```json
+{
+  "mcpServers": {
+    "airbnb": {
+      "command": "npx",
+      "args": ["-y", "@openbnb/mcp-server-airbnb", "--ignore-robots-txt"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": { "DISPLAY": ":1" }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/projects/easy-mcp-use/"]
+    }
+  }
+}
+```
+
+For a complete example of using multiple servers, see the [multi-server example](https://github.com/dforel/easy-mcp-use/blob/main/examples/multi_server_example.ts) in our repository.
+
+## Agent Configuration
+
+When creating an MCPAgent, you can configure several parameters:
+
+```typescript
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+import { ChatOpenAI } from '@langchain/openai';
+
+// Basic configuration
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4", temperature: 0.7 }),
+  client: MCPClient.fromConfigFile("config.json"),
+  maxSteps: 30
+});
+
+// Advanced configuration
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4", temperature: 0.7 }),
+  client: MCPClient.fromConfigFile("config.json"),
+  maxSteps: 30,
+  serverName: undefined,
+  autoInitialize: true,
+  memoryEnabled: true,
+  systemPrompt: "Custom instructions for the agent",
+  additionalInstructions: "Additional guidelines for specific tasks",
+  disallowedTools: ["file_system", "network", "shell"]  // Restrict potentially dangerous tools
+});
+```
+
+### Available Parameters
+
+- `llm`: Any LangChain-compatible language model (required)
+- `client`: The MCPClient instance (optional if connectors are provided)
+- `connectors`: List of connectors if not using client (optional)
+- `serverName`: Name of the server to use (optional)
+- `maxSteps`: Maximum number of steps the agent can take (default: 5)
+- `autoInitialize`: Whether to initialize automatically (default: false)
+- `memoryEnabled`: Whether to enable memory (default: true)
+- `systemPrompt`: Custom system prompt (optional)
+- `systemPromptTemplate`: Custom system prompt template (optional)
+- `additionalInstructions`: Additional instructions for the agent (optional)
+- `disallowedTools`: List of tool names that should not be available to the agent (optional)
+
+### Tool Access Control
+
+You can restrict which tools are available to the agent for security or to limit its capabilities:
+
+```typescript
+// Create agent with restricted tools
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4" }),
+  client: client,
+  disallowedTools: ["file_system", "network", "shell"]  // Restrict potentially dangerous tools
+});
+
+// Update restrictions after initialization
+agent.setDisallowedTools(["file_system", "network", "shell", "database"]);
+await agent.initialize();  // Reinitialize to apply changes
+
+// Check current restrictions
+const restrictedTools = agent.getDisallowedTools();
+console.log(`Restricted tools: ${restrictedTools}`);
+```
+
+This feature is useful for:
+
+- Restricting access to sensitive operations
+- Limiting agent capabilities for specific tasks
+- Preventing the agent from using potentially dangerous tools
+- Focusing the agent on specific functionality
+
+## Error Handling
+
+easy-mcp-use provides several ways to handle errors:
+
+1. **Connection Errors**: Check your MCP server configuration and ensure the server is running
+2. **Authentication Errors**: Verify your API keys are correctly set in the environment
+3. **Timeout Errors**: Adjust the `maxSteps` parameter if operations are timing out
