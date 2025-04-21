@@ -1,0 +1,473 @@
+---
+title: API Reference
+description: "Complete easy-mcp-use API Documentation"
+---
+
+# API Reference
+
+This section provides comprehensive documentation for the easy-mcp-use API, including all components, methods, their arguments, and when to use different options.
+
+## MCPClient
+
+The `MCPClient` is the core class for interacting with MCP servers. It handles connection management, session creation, and communication with MCP servers.
+
+### Initialization Methods
+
+#### From Config File
+
+```typescript
+import { MCPClient } from 'easy-mcp-use';
+
+const client = MCPClient.fromConfigFile("config.json");
+```
+
+| Parameter     | Type   | Required | Description                         |
+| ------------- | ------ | -------- | ----------------------------------- |
+| `config_path` | string | Yes      | Path to the JSON configuration file |
+
+#### From Dictionary
+
+```typescript
+import { MCPClient, MCPConfig } from 'easy-mcp-use';
+
+const config: MCPConfig = {
+  mcpServers: {
+    my_server: {
+      command: "npx",
+      args: ["@my-mcp/server"],
+      env: {
+        PORT: "3000"
+      }
+    }
+  }
+};
+
+const client = MCPClient.fromDict(config);
+```
+
+| Parameter | Type      | Required | Description                                    |
+| --------- | --------- | -------- | ---------------------------------------------- |
+| `config`  | MCPConfig | Yes      | Dictionary containing MCP server configuration |
+
+### Core Methods
+
+#### createSession
+
+Creates a new session with an MCP server.
+
+```typescript
+const session = await client.createSession({
+  serverName: "my_server",
+  timeout: 30.0,
+  retryCount: 3
+});
+```
+
+| Parameter     | Type   | Required | Default | Description                             |
+| ------------- | ------ | -------- | ------- | --------------------------------------- |
+| `serverName`  | string | Yes      | -       | Name of the server as defined in config |
+| `timeout`     | number | No       | 30.0    | Connection timeout in seconds           |
+| `retryCount`  | number | No       | 3       | Number of connection retry attempts     |
+
+**When to use**:
+
+- Use a longer `timeout` for servers that take more time to initialize
+- Increase `retryCount` in unstable network environments
+- Use specific `serverName` when working with multiple servers in the same config
+
+#### closeSession
+
+Closes a specific session.
+
+```typescript
+await client.closeSession(sessionId);
+```
+
+| Parameter   | Type   | Required | Description                |
+| ----------- | ------ | -------- | -------------------------- |
+| `sessionId` | string | Yes      | ID of the session to close |
+
+#### closeAllSessions
+
+Closes all active sessions.
+
+```typescript
+await client.closeAllSessions();
+```
+
+**When to use**:
+
+- Always call this at the end of your application to clean up resources
+- Use when switching between different tasks that require different servers
+
+#### getServer
+
+Gets a server instance by name.
+
+```typescript
+const server = client.getServer("my_server");
+```
+
+| Parameter | Type   | Required | Description                             |
+| --------- | ------ | -------- | --------------------------------------- |
+| `name`    | string | Yes      | Name of the server as defined in config |
+
+## MCPAgent
+
+The `MCPAgent` class combines an LLM with an MCPClient to create an intelligent agent capable of using MCP tools.
+
+### Initialization
+
+```typescript
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4", temperature: 0.7 }),
+  client: MCPClient.fromConfigFile("config.json"),
+  maxSteps: 30,
+  sessionOptions: { timeout: 60.0 },
+  autoInitialize: true,
+  memoryEnabled: true,
+  systemPrompt: null,
+  systemPromptTemplate: null,
+  additionalInstructions: null,
+  disallowedTools: null,
+  useServerManager: false
+});
+```
+
+| Parameter              | Type                | Required | Default | Description                                                  |
+| --------------------- | ------------------- | -------- | ------- | ------------------------------------------------------------ |
+| `llm`                 | BaseLanguageModel   | Yes      | -       | Any LangChain-compatible language model                      |
+| `client`              | MCPClient           | No       | null    | The MCPClient instance                                       |
+| `connectors`          | BaseConnector[]     | No       | null    | List of connectors if not using client                       |
+| `serverName`          | string              | No       | null    | Name of the server to use                                    |
+| `maxSteps`            | number              | No       | 5       | Maximum number of steps the agent can take                   |
+| `autoInitialize`      | boolean             | No       | false   | Whether to initialize automatically                          |
+| `memoryEnabled`       | boolean             | No       | true    | Whether to enable memory                                     |
+| `systemPrompt`        | string              | No       | null    | Custom system prompt                                         |
+| `systemPromptTemplate`| string              | No       | null    | Custom system prompt template                                |
+| `additionalInstructions` | string           | No       | null    | Additional instructions for the agent                        |
+| `sessionOptions`      | Record<string, any>  | No       | {}      | Additional options for session creation                      |
+| `outputParser`        | OutputParser        | No       | null    | Custom output parser for LLM responses                       |
+| `useServerManager`    | boolean             | No       | false   | If `true`, enables automatic selection of the appropriate server based on the chosen tool when multiple servers are configured via `MCPClient`. |
+| `disallowedTools`     | string[]            | No       | null    | List of tool names that should not be available to the agent |
+
+**When to use different parameters**:
+
+- **llm**:
+  - easy-mcp-use supports ANY LLM that is compatible with LangChain
+  - You can use models from OpenAI, Anthropic, Google, Mistral, Groq, Cohere, or any other provider with a LangChain integration
+  - You can even use open source models via LlamaCpp, HuggingFace, or other interfaces
+  - Custom or self-hosted models are also supported as long as they implement LangChain's interface
+
+- **maxSteps**:
+  - Increase for complex tasks that require many interactions
+  - Decrease for simpler tasks to improve efficiency
+  - Use higher values (50+) for web browsing or multi-stage tasks
+  - Use lower values (10-20) for targeted, specific tasks
+
+- **systemPrompt / systemPromptTemplate**:
+  - Use to customize the initial instructions given to the LLM
+  - Helps shape the agent's behavior and capabilities
+  - Use for specialized tasks or custom interaction patterns
+
+- **memoryEnabled**:
+  - Enable to maintain conversation history
+  - Disable for stateless operation or to save on token usage
+
+- **sessionOptions**:
+  - Customize timeout for long-running server operations
+  - Set retry parameters for unstable connections
+
+- **useServerManager**:
+  - Set to `true` when using an `MCPClient` configured with multiple servers to enable efficient, automatic server selection per tool call. This can reduce agent confusion and minimize unnecessary server connections.
+  - Keep as `false` (default) if using a single server or if you prefer to manually specify the target server using the `serverName` parameter in `agent.run()` or rely on the agent to handle tool availability across all connected servers.
+
+- **disallowedTools**:
+  - Use to restrict which tools the agent can access
+  - Helpful for security or to limit agent capabilities
+  - Useful when certain tools might be dangerous or unnecessary for a specific task
+  - Can be updated after initialization using `setDisallowedTools()`
+
+### Core Methods
+
+#### run
+
+Runs the agent with a given query.
+
+```typescript
+const result = await agent.run({
+  query: "Find information about TypeScript libraries",
+  maxSteps: 25,
+  stopOnFirstResult: false,
+  serverName: "my_server",
+  callbacks: []
+});
+```
+
+| Parameter           | Type     | Required | Default | Description                      |
+| ------------------- | -------- | -------- | ------- | -------------------------------- |
+| `query`             | string   | Yes      | -       | The query to run                 |
+| `maxSteps`          | number   | No       | null    | Overrides the instance maxSteps  |
+| `stopOnFirstResult` | boolean  | No       | false   | Whether to stop at first result  |
+| `serverName`        | string   | No       | null    | Specific server to use           |
+| `callbacks`         | any[]    | No       | null    | Callback functions for events    |
+
+**When to use different parameters**:
+
+- **maxSteps**: Override the instance default for specific queries
+- **stopOnFirstResult**: Use true for simple lookups, false for thorough exploration
+- **serverName**: Specify when using multiple servers for different tasks
+- **callbacks**: Add for monitoring or logging specific runs
+
+#### reset
+
+Resets the agent state.
+
+```typescript
+agent.reset();
+```
+
+**When to use**:
+
+- Between different tasks to clear context
+- When starting a new conversation thread
+- When agent gets stuck in a particular strategy
+
+#### getHistory
+
+Gets the agent's interaction history.
+
+```typescript
+const history = agent.getHistory();
+```
+
+**When to use**:
+
+- For debugging agent behavior
+- When implementing custom logging
+- To provide context for follow-up queries
+
+#### setDisallowedTools
+
+Sets the list of tools that should not be available to the agent.
+
+```typescript
+agent.setDisallowedTools(["tool1", "tool2"]);
+```
+
+| Parameter         | Type     | Required | Description                                     |
+| ----------------- | -------- | -------- | ----------------------------------------------- |
+| `disallowedTools` | string[] | Yes      | List of tool names that should not be available |
+
+**When to use**:
+
+- To restrict access to specific tools for security reasons
+- To limit agent capabilities for specific tasks
+- To prevent the agent from using potentially dangerous tools
+- Note: Changes take effect on next initialization
+
+#### getDisallowedTools
+
+Gets the list of tools that are not available to the agent.
+
+```typescript
+const disallowed = agent.getDisallowedTools();
+```
+
+**When to use**:
+
+- To check which tools are currently restricted
+- For debugging or auditing purposes
+- To verify tool restrictions before running the agent
+
+## Configuration Details
+
+### MCP Server Configuration Schema
+
+```json
+{
+  "mcpServers": {
+    "server_name": {
+      "command": "command_to_run",
+      "args": ["arg1", "arg2"],
+      "env": {
+        "ENV_VAR": "value"
+      },
+      "timeout": 30.0,
+      "retry": {
+        "maxAttempts": 3,
+        "backoffFactor": 1.5
+      }
+    }
+  }
+}
+```
+
+| Field             | Type   | Required | Description                          |
+| ----------------- | ------ | -------- | ------------------------------------ |
+| `command`         | string | Yes      | The command to start the MCP server  |
+| `args`            | array  | No       | Arguments to pass to the command     |
+| `env`             | object | No       | Environment variables for the server |
+| `timeout`         | number | No       | Connection timeout in seconds        |
+| `retry`           | object | No       | Retry configuration                  |
+| `retry.maxAttempts` | number | No     | Maximum retry attempts               |
+| `retry.backoffFactor` | number | No   | Backoff multiplier between retries   |
+
+**When to use different options**:
+
+- **command & args**: Vary based on the specific MCP server implementation
+- **env**:
+  - Set environment-specific variables needed by the server
+  - Override default server settings (ports, directories)
+  - Set display settings for GUI-based servers
+
+- **timeout**:
+  - Increase for servers with longer startup times
+  - Lower for simpler servers to fail fast
+
+- **retry configuration**:
+  - Adjust for different network conditions
+  - Increase maxAttempts in unstable environments
+  - Adjust backoffFactor based on server behavior
+
+## Error Handling
+
+easy-mcp-use provides several exception types to handle different error scenarios:
+
+| Exception              | Description                       | When It Occurs                      |
+| ---------------------- | --------------------------------- | ----------------------------------- |
+| `MCPConnectionError`   | Connection to MCP server failed   | Network issues, server not running  |
+| `MCPAuthenticationError` | Authentication with server failed | Invalid credentials or tokens       |
+| `MCPTimeoutError`      | Operation timed out               | Server takes too long to respond    |
+| `MCPServerError`       | Server returned an error          | Internal server error               |
+| `MCPClientError`       | Client-side error                 | Invalid configuration or parameters |
+| `MCPError`            | Generic MCP-related error         | Any other MCP-related issue         |
+
+**Handling Strategies**:
+
+```typescript
+import { MCPConnectionError, MCPTimeoutError } from 'easy-mcp-use';
+
+try {
+  const result = await agent.run({ query: "Find information" });
+} catch (error) {
+  if (error instanceof MCPConnectionError) {
+    // Handle connection issues
+    console.log("Failed to connect to the MCP server");
+  } else if (error instanceof MCPTimeoutError) {
+    // Handle timeout issues
+    console.log("Operation timed out");
+  } else {
+    // Handle other exceptions
+    console.log(`An error occurred: ${error}`);
+  }
+}
+```
+
+## Advanced Usage
+
+### Multi-Server Configuration
+
+Configure and use multiple MCP servers in a single application:
+
+```typescript
+import { MCPClient, MCPAgent, MCPConfig } from 'easy-mcp-use';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+
+// Create client with multiple servers
+const config: MCPConfig = {
+  mcpServers: {
+    browser: {
+      command: "npx",
+      args: ["@playwright/mcp@latest"]
+    },
+    custom_server: {
+      command: "node",
+      args: ["-r", "ts-node/register", "my_custom_mcp_server.ts"]
+    }
+  }
+};
+
+const client = MCPClient.fromDict(config);
+
+// Create agent
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4" }),
+  client: client
+});
+
+// Run with specific server
+const resultBrowser = await agent.run({
+  query: "Search the web for TypeScript libraries",
+  serverName: "browser"
+});
+
+// Run with different server
+const resultCustom = await agent.run({
+  query: "Perform custom operation",
+  serverName: "custom_server"
+});
+```
+
+### Custom Output Parsing
+
+Implement custom output parsers for specialized MCP servers:
+
+```typescript
+import { OutputParser } from 'langchain/schema';
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+
+class CustomOutputParser implements OutputParser {
+  parse(text: string): any {
+    // Custom parsing logic
+    return processedResult;
+  }
+}
+
+// Use the custom parser
+const agent = new MCPAgent({
+  llm: llm,
+  client: client,
+  outputParser: new CustomOutputParser()
+});
+```
+
+This approach is useful when:
+
+- The MCP server returns structured data that needs special handling
+- You need to extract specific information from responses
+- You're integrating with custom or specialized MCP servers
+
+### Restricting Tool Access
+
+Control which tools are available to the agent:
+
+```typescript
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+
+// Create agent with restricted tools
+const agent = new MCPAgent({
+  llm: new ChatOpenAI({ modelName: "gpt-4" }),
+  client: client,
+  disallowedTools: ["file_system", "network", "shell"]  // Restrict potentially dangerous tools
+});
+
+// Update restrictions after initialization
+agent.setDisallowedTools(["file_system", "network", "shell", "database"]);
+await agent.initialize();  // Reinitialize to apply changes
+
+// Check current restrictions
+const restrictedTools = agent.getDisallowedTools();
+console.log(`Restricted tools: ${restrictedTools}`);
+```
+
+This approach is useful when:
+
+- You need to restrict access to sensitive operations
+- You want to limit the agent's capabilities for specific tasks
+- You're concerned about security implications of certain tools
+- You want to focus the agent on specific functionality

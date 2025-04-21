@@ -1,0 +1,217 @@
+---
+title: Quickstart
+description: "Get started with easy-mcp-use in minutes"
+---
+
+# Quickstart Guide
+
+This guide will help you get started with easy-mcp-use quickly. We'll cover installation, basic configuration, and running your first agent.
+
+## Installation
+
+You can install easy-mcp-use using npm:
+
+```bash
+npm install easy-mcp-use
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/dforel/easy-mcp-use.git
+cd easy-mcp-use
+npm install
+npm run build
+```
+
+## Installing LangChain Dependencies
+
+easy-mcp-use works with various LLM providers through LangChain. The core LangChain dependencies are included, but you might need to install additional provider-specific packages:
+
+```bash
+# For OpenAI
+npm install @langchain/openai
+
+# For Anthropic
+npm install @langchain/anthropic
+
+# For other providers, check the [LangChain documentation](https://js.langchain.com/docs/integrations/chat/)
+```
+
+> **Important**: Only models with tool calling capabilities can be used with easy-mcp-use. Make sure your chosen model supports function calling or tool use.
+
+## Environment Setup
+
+Create a `.env` file in your project root:
+
+```bash
+OPENAI_API_KEY=your_api_key_here
+ANTHROPIC_API_KEY=your_api_key_here
+```
+
+## Your First Agent
+
+Here's a simple example to get you started:
+
+```typescript
+import { config } from 'dotenv';
+import { ChatOpenAI } from '@langchain/openai';
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+
+async function main() {
+    // Load environment variables
+    config();
+
+    // Create configuration object
+    const mcpConfig = {
+      mcpServers: {
+        playwright: {
+          command: 'npx',
+          args: ['@playwright/mcp@latest'],
+          env: {
+            DISPLAY: ':1'
+          }
+        }
+      }
+    };
+
+    // Create MCPClient from configuration object
+    const client = MCPClient.fromDict(mcpConfig);
+
+    // Create LLM
+    const llm = new ChatOpenAI({ modelName: 'gpt-4' });
+
+    // Create agent with the client
+    const agent = new MCPAgent({ llm, client, maxSteps: 30 });
+
+    // Run the query
+    const result = await agent.run(
+        'Find the best restaurant in San Francisco USING GOOGLE SEARCH'
+    );
+    console.log('\nResult:', result);
+}
+
+main().catch(console.error);
+```
+
+## Configuration Options
+
+You can also add the servers configuration from a config file:
+
+```typescript
+const client = MCPClient.fromConfigFile(
+    path.join(__dirname, 'browser_mcp.json')
+);
+```
+
+Example configuration file (`browser_mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {
+        "DISPLAY": ":1"
+      }
+    }
+  }
+}
+```
+
+## Using Multiple Servers
+
+The `MCPClient` can be configured with multiple MCP servers, allowing your agent to access tools from different sources. This capability enables complex workflows spanning various domains.
+
+**Configuration:**
+
+Define multiple servers in your configuration file (`multi_server_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "airbnb": {
+      "command": "npx",
+      "args": ["-y", "@openbnb/mcp-server-airbnb", "--ignore-robots-txt"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {
+        "DISPLAY": ":1"
+      }
+    }
+  }
+}
+```
+
+**Usage:**
+
+```typescript
+// Assuming MCPClient is initialized with the multi_server_config.json
+const client = MCPClient.fromConfigFile('multi_server_config.json');
+const agent = new MCPAgent({ llm, client }); // Server manager not enabled by default
+
+// Manually specify the server if needed
+const result = await agent.run(
+    'Search for Airbnb listings in Barcelona',
+    { serverName: 'airbnb' }
+);
+```
+
+## Enabling Dynamic Server Selection (Server Manager)
+
+To improve efficiency when working with multiple servers, you can enable the Server Manager:
+
+```typescript
+// Enable server manager during agent creation
+const agent = new MCPAgent({
+    llm,
+    client,
+    useServerManager: true
+});
+
+// The agent will automatically select the appropriate server
+const result = await agent.run(
+    'Search for a place in Barcelona on Airbnb, then Google nearby restaurants.'
+);
+```
+
+## Restricting Tool Access
+
+You can control which tools are available to the agent:
+
+```typescript
+import { config } from 'dotenv';
+import { ChatOpenAI } from '@langchain/openai';
+import { MCPAgent, MCPClient } from 'easy-mcp-use';
+
+async function main() {
+    config();
+
+    const mcpConfig = {
+      mcpServers: {
+        playwright: {
+          command: 'npx',
+          args: ['@playwright/mcp@latest'],
+          env: {
+            DISPLAY: ':1'
+          },
+          allowedTools: ['navigate', 'click'] // Only allow these tools
+        }
+      }
+    };
+
+    const client = MCPClient.fromDict(mcpConfig);
+    const llm = new ChatOpenAI({ modelName: 'gpt-4' });
+    const agent = new MCPAgent({ llm, client });
+
+    const result = await agent.run(
+        'Navigate to example.com and click the first link'
+    );
+    console.log('\nResult:', result);
+}
+
+main().catch(console.error);
+```

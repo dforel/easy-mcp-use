@@ -1,0 +1,86 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "easy-mcp-use",
+  "colors": {
+    "primary": "#062c24",
+    "light": "#55e4c8",
+    "dark": "#000000"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Essentials",
+            "pages": [
+              "essentials/configuration",
+              "essentials/llm-integration",
+              "essentials/debugging",
+              "essentials/connection-types"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api-reference/introduction"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/dforel/easy-mcp-use"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/dforel/easy-mcp-use"
+    }
+  },
+  "anchors": [
+    {
+      "name": "Documentation",
+      "icon": "book-open",
+      "url": "/"
+    },
+    {
+      "name": "API Reference",
+      "icon": "code",
+      "url": "/api-reference"
+    },
+    {
+      "name": "Development",
+      "icon": "code-branch",
+      "url": "/development"
+    }
+  ],
+  "feedback": {
+    "suggestEdit": true,
+    "raiseIssue": true
+  }
+}

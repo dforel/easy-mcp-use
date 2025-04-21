@@ -1,0 +1,283 @@
+---
+title: 开发指南
+description: "学习如何扩展和自定义 easy-mcp-use"
+---
+
+# 开发指南
+
+本指南将帮助您了解如何扩展和自定义 easy-mcp-use 的功能，以满足您的特定需求。
+
+## 创建自定义连接器
+
+### 基本结构
+
+自定义连接器需要实现 `BaseConnector` 接口：
+
+```typescript
+import { BaseConnector } from 'easy-mcp-use';
+
+class CustomConnector implements BaseConnector {
+  constructor(config: any) {
+    // 初始化连接器
+  }
+
+  async createTransport() {
+    // 实现传输层逻辑
+  }
+
+  async close() {
+    // 清理资源
+  }
+}
+```
+
+### 注册连接器
+
+```typescript
+import { registerConnector } from 'easy-mcp-use';
+
+registerConnector('custom', CustomConnector);
+```
+
+## 自定义工具
+
+### 创建工具
+
+```typescript
+import { BaseTool } from 'easy-mcp-use';
+
+class CustomTool extends BaseTool {
+  name = 'custom.tool';
+  description = '自定义工具描述';
+
+  async _run(args: any) {
+    // 实现工具逻辑
+    return result;
+  }
+}
+```
+
+### 注册工具
+
+```typescript
+import { registerTool } from 'easy-mcp-use';
+
+registerTool(new CustomTool());
+```
+
+## 扩展代理功能
+
+### 自定义代理类
+
+```typescript
+import { MCPAgent } from 'easy-mcp-use';
+
+class CustomAgent extends MCPAgent {
+  constructor(config: any) {
+    super(config);
+    // 添加自定义初始化逻辑
+  }
+
+  async customMethod() {
+    // 实现自定义方法
+  }
+}
+```
+
+### 自定义输出解析器
+
+```typescript
+import { OutputParser } from 'langchain/schema';
+
+class CustomOutputParser implements OutputParser {
+  parse(text: string) {
+    // 实现自定义解析逻辑
+    return parsedResult;
+  }
+}
+```
+
+## 最佳实践
+
+### 错误处理
+
+```typescript
+class CustomError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CustomError';
+  }
+}
+
+class CustomTool extends BaseTool {
+  async _run(args: any) {
+    try {
+      // 工具逻辑
+    } catch (error) {
+      throw new CustomError(`工具执行失败: ${error.message}`);
+    }
+  }
+}
+```
+
+### 类型安全
+
+```typescript
+interface CustomToolArgs {
+  param1: string;
+  param2: number;
+}
+
+class CustomTool extends BaseTool {
+  async _run(args: CustomToolArgs) {
+    // 类型安全的工具实现
+  }
+}
+```
+
+### 测试
+
+```typescript
+import { describe, it, expect } from 'jest';
+
+describe('CustomTool', () => {
+  it('should handle valid input', async () => {
+    const tool = new CustomTool();
+    const result = await tool._run({
+      param1: 'test',
+      param2: 42
+    });
+    expect(result).toBeDefined();
+  });
+
+  it('should handle errors', async () => {
+    const tool = new CustomTool();
+    await expect(tool._run({
+      param1: 'invalid',
+      param2: -1
+    })).rejects.toThrow(CustomError);
+  });
+});
+```
+
+## 调试技巧
+
+### 日志记录
+
+```typescript
+import { logger } from 'easy-mcp-use';
+
+class CustomTool extends BaseTool {
+  async _run(args: any) {
+    logger.debug('工具参数:', args);
+    const result = await this.processArgs(args);
+    logger.debug('工具结果:', result);
+    return result;
+  }
+}
+```
+
+### 性能监控
+
+```typescript
+import { performance } from 'perf_hooks';
+
+class CustomTool extends BaseTool {
+  async _run(args: any) {
+    const start = performance.now();
+    const result = await this.processArgs(args);
+    const duration = performance.now() - start;
+    logger.debug(`工具执行时间: ${duration}ms`);
+    return result;
+  }
+}
+```
+
+## 部署考虑
+
+### 环境配置
+
+```typescript
+class CustomConnector implements BaseConnector {
+  constructor(config: any) {
+    this.apiKey = process.env.CUSTOM_API_KEY;
+    this.endpoint = process.env.CUSTOM_ENDPOINT;
+  }
+}
+```
+
+### 安全性
+
+```typescript
+class CustomTool extends BaseTool {
+  validateInput(args: any) {
+    // 输入验证
+    if (!args.param1 || typeof args.param1 !== 'string') {
+      throw new Error('无效的参数');
+    }
+    // 安全检查
+    if (args.param1.includes('../')) {
+      throw new Error('不允许的路径遍历');
+    }
+  }
+
+  async _run(args: any) {
+    this.validateInput(args);
+    return await this.processArgs(args);
+  }
+}
+```
+
+## 贡献指南
+
+### 代码风格
+
+- 使用 TypeScript 严格模式
+- 遵循项目的 ESLint 配置
+- 编写详细的注释和文档
+- 包含单元测试
+
+### 提交变更
+
+1. Fork 项目仓库
+2. 创建功能分支
+3. 提交变更
+4. 运行测试
+5. 提交 Pull Request
+
+## 常见问题
+
+### Q: 如何处理异步操作？
+
+```typescript
+class CustomTool extends BaseTool {
+  async _run(args: any) {
+    const [result1, result2] = await Promise.all([
+      this.asyncOperation1(args),
+      this.asyncOperation2(args)
+    ]);
+    return this.combineResults(result1, result2);
+  }
+}
+```
+
+### Q: 如何管理工具状态？
+
+```typescript
+class CustomTool extends BaseTool {
+  private state: Map<string, any> = new Map();
+
+  async _run(args: any) {
+    const currentState = this.state.get(args.id);
+    const result = await this.processWithState(args, currentState);
+    this.state.set(args.id, result.newState);
+    return result.output;
+  }
+}
+```
+
+## 下一步
+
+- 查看[示例代码库](https://github.com/yourusername/easy-mcp-use/tree/main/examples)
+- 加入[开发者社区](https://github.com/yourusername/easy-mcp-use/discussions)
+- 报告[问题和建议](https://github.com/yourusername/easy-mcp-use/issues)
