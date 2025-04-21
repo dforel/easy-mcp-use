@@ -315,9 +315,9 @@ We love contributions! Feel free to open issues for bugs or feature requests.
 If you use MCP-Use-TS in your research or project, please cite:
 
 ```bibtex
-@software{mcp_use_ts,
+@software{easy-mcp-use,
   author = {dforel},
-  title = {MCP-Use-TS: MCP Library for TypeScript},
+  title = {Easy-MCP-Use: MCP Library for TypeScript},
   year = {2025},
   publisher = {GitHub},
   url = {https://github.com/dforel/easy-mcp-use}
