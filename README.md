@@ -1,6 +1,4 @@
-<div align="center">
-English | [简体中文](/README_zh-CN.md)
-</div>
+English|[简体中文](/README_zh-CN.md)
 
 <h1 align="center">Unified MCP Client Library for TypeScript</h1>
 
