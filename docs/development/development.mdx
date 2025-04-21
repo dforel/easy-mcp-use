@@ -1,0 +1,257 @@
+---
+title: Development Guide
+description: "Learn how to extend and customize easy-mcp-use"
+---
+
+# Development Guide
+
+This guide will help you understand how to extend and customize easy-mcp-use to meet your specific needs.
+
+## Prerequisites
+
+- Node.js 20.x or later
+- npm 7.x or later
+- TypeScript 4.x or later
+- Basic understanding of TypeScript and async programming
+
+## Development Environment Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/dforel/easy-mcp-use.git
+cd easy-mcp-use
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Build the project:
+```bash
+npm run build
+```
+
+## Project Structure
+
+```
+easy-mcp-use/
+├── src/
+│   ├── adapters/      # Protocol adapters
+│   ├── agents/        # Agent implementations
+│   ├── connectors/    # Transport connectors
+│   ├── task_managers/ # Task management
+│   └── utils/         # Utility functions
+├── tests/
+│   └── unit/         # Unit tests
+├── examples/         # Example implementations
+└── docs/            # Documentation
+```
+
+## Code Style
+
+### TypeScript Guidelines
+
+- Use strict TypeScript mode
+- Define interfaces for all public APIs
+- Use async/await for asynchronous operations
+- Implement proper error handling
+
+```typescript
+// Good
+interface Config {
+  apiKey: string;
+  endpoint?: string;
+}
+
+async function connect(config: Config): Promise<void> {
+  try {
+    await validateConfig(config);
+    // Implementation
+  } catch (error) {
+    throw new ConnectionError(`Failed to connect: ${error.message}`);
+  }
+}
+
+// Bad
+function connect(config: any) {
+  // Implementation without type safety
+}
+```
+
+### Error Handling
+
+```typescript
+class CustomError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CustomError';
+  }
+}
+
+class SafeOperation {
+  async execute(): Promise<void> {
+    try {
+      await this.riskyOperation();
+    } catch (error) {
+      throw new CustomError(`Operation failed: ${error.message}`);
+    }
+  }
+}
+```
+
+## Testing
+
+### Unit Tests
+
+We use Jest for testing. Write tests in the `tests/unit` directory:
+
+```typescript
+import { describe, it, expect } from 'jest';
+
+describe('CustomConnector', () => {
+  it('should establish connection', async () => {
+    const connector = new CustomConnector(config);
+    await expect(connector.connect()).resolves.not.toThrow();
+  });
+
+  it('should handle connection errors', async () => {
+    const connector = new CustomConnector(invalidConfig);
+    await expect(connector.connect()).rejects.toThrow(ConnectionError);
+  });
+});
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test -- tests/unit/connector.test.ts
+```
+
+## Documentation
+
+### Code Documentation
+
+- Use JSDoc comments for public APIs
+- Include examples in documentation
+- Document error cases and edge conditions
+
+```typescript
+/**
+ * Creates a new MCP client instance.
+ * @param {MCPConfig} config - The configuration object
+ * @returns {Promise<MCPClient>} A configured client instance
+ * @throws {ConfigError} If the configuration is invalid
+ * @example
+ * const client = await MCPClient.create({
+ *   apiKey: 'your-api-key',
+ *   endpoint: 'https://api.example.com'
+ * });
+ */
+static async create(config: MCPConfig): Promise<MCPClient> {
+  // Implementation
+}
+```
+
+## Contributing
+
+### Contribution Process
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add or update tests
+5. Update documentation
+6. Submit a pull request
+
+### Pull Request Guidelines
+
+- Follow the existing code style
+- Include unit tests for new features
+- Update documentation as needed
+- Keep changes focused and atomic
+
+### Commit Messages
+
+Follow conventional commits format:
+
+```
+feat: add new connector for custom protocol
+fix: resolve connection timeout issue
+docs: update API documentation
+test: add tests for error handling
+```
+
+## Debugging
+
+### Logging
+
+```typescript
+import { logger } from 'easy-mcp-use';
+
+class CustomConnector {
+  async connect() {
+    logger.debug('Attempting connection...');
+    try {
+      // Connection logic
+      logger.info('Connection established');
+    } catch (error) {
+      logger.error('Connection failed:', error);
+      throw error;
+    }
+  }
+}
+```
+
+### Performance Monitoring
+
+```typescript
+import { performance } from 'perf_hooks';
+
+class PerformanceAware {
+  async measure<T>(operation: () => Promise<T>): Promise<T> {
+    const start = performance.now();
+    try {
+      return await operation();
+    } finally {
+      const duration = performance.now() - start;
+      logger.debug(`Operation took ${duration}ms`);
+    }
+  }
+}
+```
+
+## Security Best Practices
+
+- Never commit sensitive information
+- Use environment variables for secrets
+- Implement proper input validation
+- Follow security guidelines for dependencies
+
+```typescript
+class SecureConnector {
+  constructor() {
+    this.apiKey = process.env.API_KEY;
+    if (!this.apiKey) {
+      throw new ConfigError('API key not found in environment');
+    }
+  }
+
+  validateInput(data: unknown): void {
+    // Input validation logic
+  }
+}
+```
+
+## Next Steps
+
+- Check out the [examples](https://github.com/dforel/easy-mcp-use/tree/main/examples)
+- Join our [developer community](https://github.com/dforel/easy-mcp-use/discussions)
+- Report [issues and suggestions](https://github.com/dforel/easy-mcp-use/issues)
