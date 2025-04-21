@@ -1,3 +1,6 @@
+<div align="center">
+English | [简体中文](README_zh-CN.md)
+</div>
 
 <h1 align="center">Unified MCP Client Library for TypeScript</h1>
 
@@ -11,6 +14,9 @@
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
 [![GitHub stars](https://img.shields.io/github/stars/dforel/easy-mcp-use?style=social)](https://github.com/dforel/easy-mcp-use/stargazers)
 [![Twitter Follow](https://img.shields.io/twitter/follow/dforel99?style=social)](https://x.com/dforel99)
+
+
+
 
 🌐 Easy-MCP-Use is the open source TypeScript library to connect **any LLM to any MCP server** and build custom agents that have tool access, without using closed source or application clients.
 
