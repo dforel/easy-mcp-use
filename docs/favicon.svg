@@ -1,0 +1,10 @@
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+
+ <g>
+  <title>Layer 1</title>
+  <rect id="svg_1" fill="#121212" height="64" width="64"/>
+  <text transform="matrix(1.12849 0 0 0.964539 -3.84762 3.09701)" stroke="null" id="svg_2" text-anchor="middle" fill="#ffffff" font-weight="800" font-size="20px" font-family="'Nunito', sans-serif" class="logo-text" y="38.25438" x="32.18883">mcp</text>
+  <text transform="matrix(1.39468 0 0 1.18729 -4.42684 -16.363)" stroke="null" id="svg_3" text-anchor="middle" fill="#ffffff" font-weight="800" font-size="20px" font-family="'Nunito', sans-serif" class="logo-text" y="64.10123" x="26.71778">use</text>
+  <text transform="matrix(1.26701 0 0 1.22296 -2.83847 1.99644)" stroke="null" id="svg_4" text-anchor="middle" fill="#ffffff" font-weight="800" font-size="20px" font-family="'Nunito', sans-serif" class="logo-text" y="16.42278" x="28.10263">easy</text>
+ </g>
+</svg>
