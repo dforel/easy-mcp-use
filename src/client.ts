@@ -25,6 +25,10 @@ export class MCPClient {
   static fromConfig(config: MCPClientConfig): MCPClient {
     return new MCPClient(config);
   }
+  // 兼容mcp-use的设计
+  static fromDict(config: MCPClientConfig): MCPClient {
+    return new MCPClient(config);
+  }
 
   static async fromConfigFile(filepath: string): Promise<MCPClient> {
     logger.debug(`Loading configuration from file: ${filepath}`);
