@@ -1,15 +1,15 @@
 
 <h1 align="center">Unified MCP Client Library for TypeScript</h1>
 
-<!-- [![npm Downloads](https://img.shields.io/npm/dw/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
-[![npm Monthly Downloads](https://img.shields.io/npm/dm/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use) -->
+[![npm Downloads](https://img.shields.io/npm/dw/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
+[![npm Monthly Downloads](https://img.shields.io/npm/dm/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
 [![npm Version](https://img.shields.io/npm/v/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
 [![TypeScript Support](https://img.shields.io/npm/types/easy-mcp-use.svg)](https://www.npmjs.com/package/easy-mcp-use)
 [![Documentation](https://img.shields.io/badge/docs-easy--mcp--use.52kx.net-blue)](https://easy-mcp-use.52kx.net)
 [![License](https://img.shields.io/github/license/dforel/easy-mcp-use)](https://github.com/dforel/easy-mcp-use/blob/main/LICENSE)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io)
-<!-- [![GitHub stars](https://img.shields.io/github/stars/pietrozullo/easy-mcp-use?style=social)](https://github.com/dforel/easy-mcp-use/stargazers) -->
-<!-- [![Twitter Follow](https://img.shields.io/twitter/follow/Pietro?style=social)](https://x.com/pietrozullo) -->
+[![GitHub stars](https://img.shields.io/github/stars/dforel/easy-mcp-use?style=social)](https://github.com/dforel/easy-mcp-use/stargazers)
+[![Twitter Follow](https://img.shields.io/twitter/follow/dforel99?style=social)](https://x.com/dforel99)
 
 🌐 Easy-MCP-Use is the open source TypeScript library to connect **any LLM to any MCP server** and build custom agents that have tool access, without using closed source or application clients.
 
