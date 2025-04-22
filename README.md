@@ -165,8 +165,8 @@ For other settings, models, and more, check out the documentation.
 ## http server example
 
 there have a example project:
-[easy-mcp-use-example](https://github.com/dforel/easy-mcp-use-example)
-(https://github.com/dforel/easy-mcp-use-example)
+[easy-mcp-use-example](https://github.com/dforel/easy-mcp-use-examples)
+(https://github.com/dforel/easy-mcp-use-examples)
 
 ## Web Browsing with Playwright
 
