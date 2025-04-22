@@ -1,6 +1,6 @@
 {
   "name": "easy-mcp-use",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "TypeScript version of mcp-use library",
   "types": "index.d.ts",
   "type": "commonjs",

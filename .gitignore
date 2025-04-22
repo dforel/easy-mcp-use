@@ -50,3 +50,4 @@ DS_Store
 *.swo
 .env
 log.txt
+pack.md
