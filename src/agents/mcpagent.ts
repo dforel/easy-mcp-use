@@ -224,13 +224,32 @@ export class MCPAgent {
     });
   }
 
-  async run(query: string): Promise<Record<string, any>> {
-    if (!this.initialized) {
-      if (this.autoInitialize) {
+  /**
+   * Run a query using the MCP tools.
+   * 
+   * @param query The query to run
+   * @param max_steps Optional maximum number of steps to take
+   * @param manage_connector Whether to handle the connector lifecycle internally
+   * @param external_history Optional external conversation history to use instead of the internal history
+   * @returns The result of running the query
+   */
+  async run(query: string, 
+    max_steps?: number, 
+    manage_connector: boolean = true, 
+    external_history?: BaseMessage[]): Promise<Record<string, any>> {
+    let initializedHere = false;
+    
+    try {
+      // Initialize if needed
+      if (manage_connector && !this.initialized) {
         await this.initialize();
-      } else {
-        throw new Error('Agent not initialized. Call initialize() first or set autoInitialize=true.');
+        initializedHere = true;
+      } else if (!this.initialized && this.autoInitialize) {
+        await this.initialize();
+        initializedHere = true;
       }
+    }catch (err){
+      throw new Error(`Initialization might have failed. ${err}` );
     }
 
     // if(1==1){
@@ -240,10 +259,18 @@ export class MCPAgent {
     if (!this.agentExecutor) {
         throw new Error('AgentExecutor not created. Initialization might have failed.');
     }
+    
+    // Set max steps if provided
+    const steps = max_steps !== undefined ? max_steps : this.maxSteps;
+    if (this.agentExecutor) {
+        this.agentExecutor.maxIterations = steps;
+    }
 
     logger.info(`🏃 Running agent with query: "${query}"`);
 
-    const currentHistory = this.memoryEnabled ? this.conversationHistory : (this.systemMessage ? [this.systemMessage] : []);
+    // Use external history if provided, otherwise use internal conversation history
+    const historyToUse = external_history !== undefined ? external_history : this.conversationHistory;
+    const currentHistory = this.memoryEnabled ? historyToUse : (this.systemMessage ? [this.systemMessage] : []);
 
     try {
         const result = await this.agentExecutor.invoke({
@@ -270,6 +297,13 @@ export class MCPAgent {
     } catch (error) {
         logger.error(`Agent execution failed: ${error}`);
         throw error;
+    } finally {
+        // Clean up if necessary (e.g., if not using client-managed sessions)
+        if (manage_connector && !this.client && initializedHere) {
+            logger.info('🧹 Closing agent after query completion');
+            // Add a close method if needed
+            // await this.close();
+        }
     }
   }
 
