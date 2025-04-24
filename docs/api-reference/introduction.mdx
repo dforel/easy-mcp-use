@@ -149,7 +149,7 @@ const agent = new MCPAgent({
 | `systemPrompt`        | string              | No       | null    | Custom system prompt                                         |
 | `systemPromptTemplate`| string              | No       | null    | Custom system prompt template                                |
 | `additionalInstructions` | string           | No       | null    | Additional instructions for the agent                        |
-| `sessionOptions`      | Record<string, any>  | No       | {}      | Additional options for session creation                      |
+| `sessionOptions`      | Record\< string, any\>  | No       | {}      | Additional options for session creation                      |
 | `outputParser`        | OutputParser        | No       | null    | Custom output parser for LLM responses                       |
 | `useServerManager`    | boolean             | No       | false   | If `true`, enables automatic selection of the appropriate server based on the chosen tool when multiple servers are configured via `MCPClient`. |
 | `disallowedTools`     | string[]            | No       | null    | List of tool names that should not be available to the agent |
