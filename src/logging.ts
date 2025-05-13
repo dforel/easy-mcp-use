@@ -239,7 +239,7 @@ if (debugEnv === '2') {
 }
 
 // Configure default logger on import
-Logger.configure("./log.txt");
+// Logger.configure("./log.txt");
 
 // Export a default logger instance
 export const logger = Logger.getLogger();
